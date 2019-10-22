@@ -1,0 +1,21 @@
+---
+node_types:
+  master:
+    number: 1
+    cpu: 2
+    ram: 4096
+
+  node-sml:
+    number: 2
+    cpu: 1
+    ram: 2048
+
+  node-mid:
+    number: 2
+    cpu: 1
+    ram: 4096
+
+  node-lrg:
+    number: 3
+    cpu: 2
+    ram: 8192
