@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+
+
+from sys import stdout, exit
+from json import dump
+from yaml import load, CLoader
+import subprocess as sp
+
+
+def main():
+    """ dump inventory return as json """
+    dump(inventory(), fp=stdout, indent=4)
+
+
+def group_name(name):
+
+    if name in ["master", "node"]:
+        return "kube-{}".format(name)
+
+    return "defaults"
+
+
+def inventory():
+    " generate ansible inventory "
+
+    data = {}
+    meta = meta_defaults()
+
+    for host, settings in vagrant_ssh_config().items():
+
+        # updating group
+        group = group_name(host.split("-")[0])
+        hosts = data.get(group, [])
+        hosts.append(host)
+        data.update({group: hosts})
+
+        # host meta
+        meta.update({host: dict(transform(settings), **meta.get(host, {}))})
+
+    # additional groups
+
+    data.update({"etcd": data.get("kube-master", [])})
+    data.update({"k8s-cluster": data.get("kube-master", []) + data.get("kube-node", [])})
+    data.update({"k8s-cluster": data.get("kube-master", []) + data.get("kube-node", [])})
+
+
+    data.update({"_meta": {"hostvars": meta}})
+
+    return data
+
+
+def meta_defaults():
+    """ reads yaml generated for hosts - to emulate kubespray"""
+    try:
+        with open(".hosts.yml") as f:
+            meta = load(f, Loader=CLoader)
+    except FileNotFoundError:
+        return {}
+    finally:
+        meta = {
+            host: {option[1:]: value for option, value in items.items()}
+            for host, items in meta.items()
+        }
+    return meta
+
+
+def transform(data):
+    """
+    transform data we got from ssh config into meaningful for ansible structure
+    """
+    structured = {}
+
+    structured["ansible_port"] = data["Port"]
+    structured["ansible_host"] = data["HostName"]
+    structured["ansible_user"] = data["User"]
+    structured["ansible_private_key_file"] = data["IdentityFile"]
+
+    structured["ansible_ssh_common_args"] = "  ".join(
+        [
+            "-o StrictHostKeyChecking=no",
+            "-o UserKnownHostsFile=/dev/null",
+            "-o ControlMaster=auto",
+            "-o ControlPersist=30m",
+            "-o ConnectionAttempts=100",
+        ]
+    )
+
+    return structured
+
+
+def vagrant_ssh_config():
+    """ Return output of the vagrant ssh-config as dictionaty """
+    proc = sp.Popen("vagrant ssh-config", stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
+    out, _ = proc.communicate()
+
+    hosts = {}
+    new_line = True  # new block
+    for line in out.decode().split("\n"):
+
+        if new_line is True:
+            hostname = line.replace("Host ", "")
+            new_line = False
+        elif len(line) == 0:
+            new_line = True
+        else:
+            data = line[2:].split(" ")
+
+            host = hosts.get(hostname, {})
+            host.update({data[0]: " ".join(data[1:])})
+            hosts.update({hostname: host})
+
+    return hosts
+
+
+if __name__ == "__main__":
+    exit(main())
