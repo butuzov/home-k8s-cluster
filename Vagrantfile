@@ -97,8 +97,10 @@ Vagrant.configure("2") do |config|
     box.customize [ "modifyvm", :id, "--macaddress1", "auto" ]
     box.customize [ "modifyvm", :id, "--nestedpaging", "on" ]
     box.customize [ "modifyvm", :id, "--ioapic", "on" ]
-    box.linked_clone = true
+    box.customize [ "modifyvm", :id, '--audio', 'none']
+    box.customize [ "modifyvm", :id, "--usbxhci", "off", "--usb", "off", "--usbehci", "off" ]
     box.customize [ "modifyvm", :id, "--vram", "8"]
+    box.linked_clone = true
   end
 
 
