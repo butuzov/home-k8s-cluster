@@ -18,16 +18,14 @@ cp .vagrant/provisioners/ansible/inventory/artifacts/admin.conf ~/.kube/config
 
 # test
 kubectl get nodes
-
 > NAME         STATUS   ROLES    AGE   VERSION
-> master-1     Ready    master   2m   v1.16.2
-> node-lrg-1   Ready    <none>   1m   v1.16.2
-> node-lrg-2   Ready    <none>   1m   v1.16.2
-> node-lrg-3   Ready    <none>   1m   v1.16.2
-> node-mid-1   Ready    <none>   1m   v1.16.2
-> node-mid-2   Ready    <none>   1m   v1.16.2
-> node-sml-1   Ready    <none>   1m   v1.16.2
-> node-sml-2   Ready    <none>   1m   v1.16.2
+> master-1     Ready    master   2m    v1.16.2
+> node-lrg-1   Ready    <none>   1m    v1.16.2
+> node-lrg-2   Ready    <none>   1m    v1.16.2
+> node-mid-1   Ready    <none>   1m    v1.16.2
+> node-mid-2   Ready    <none>   1m    v1.16.2
+> node-sml-1   Ready    <none>   1m    v1.16.2
+> node-sml-2   Ready    <none>   1m    v1.16.2
 ```
 
 ## Customize
@@ -54,7 +52,7 @@ node_types:
     ram: 4096
 
   node-lrg:
-    number: 3
+    number: 2
     cpu: 2
     ram: 8192
 

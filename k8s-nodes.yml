@@ -16,6 +16,6 @@ node_types:
     ram: 4096
 
   node-lrg:
-    number: 3
+    number: 2
     cpu: 2
     ram: 8192
